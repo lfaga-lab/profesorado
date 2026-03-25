@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Lista con Cámara | Docente</title>
+  <style>
+    :root{
+      --bg:#f3efdc;
+      --card:#fffdf7cc;
+      --card-solid:#fffdf7;
+      --text:#18324a;
+      --muted:#557089;
+      --primary:#24496e;
+      --secondary:#3d8fb0;
+      --accent:#da6863;
+      --ok:#2e8b57;
+      --warn:#be7f4f;
+      --danger:#c14d4d;
+      --border:rgba(36,73,110,.12);
+      --shadow:0 18px 50px rgba(36,73,110,.12);
+      --radius:24px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#f7f3e7 0%,#f0efe8 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    body{min-height:100dvh}
+    .app{max-width:760px;margin:0 auto;padding:18px 14px 90px}
+    .hero{position:sticky;top:0;z-index:10;backdrop-filter:blur(20px);background:rgba(243,239,220,.72);border-bottom:1px solid rgba(36,73,110,.08);margin:0 -14px 18px;padding:14px 14px 12px}
+    .hero h1{margin:0;font-size:1.35rem;letter-spacing:-.03em}
+    .hero p{margin:6px 0 0;color:var(--muted);font-size:.92rem}
+    .panel,.card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:var(--radius)}
+    .panel{padding:16px}
+    .stack{display:grid;gap:14px}
+    .grid{display:grid;gap:12px}
+    .grid.two{grid-template-columns:1fr 1fr}
+    .label{font-size:.88rem;color:var(--muted);font-weight:700;margin-bottom:6px}
+    input,select,button,textarea{font:inherit}
+    input,select,textarea{width:100%;border-radius:18px;border:1px solid rgba(36,73,110,.16);padding:14px 14px;background:#fff;color:var(--text);outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--secondary);box-shadow:0 0 0 4px rgba(61,143,176,.12)}
+    button{border:none;border-radius:18px;padding:14px 16px;font-weight:800;cursor:pointer;transition:.18s transform ease,.18s opacity ease,.18s box-shadow ease}
+    button:active{transform:scale(.985)}
+    .btn-primary{background:linear-gradient(180deg,var(--primary),#1c3e60);color:#fff;box-shadow:0 12px 28px rgba(36,73,110,.22)}
+    .btn-secondary{background:#e9f3f7;color:var(--primary)}
+    .btn-accent{background:linear-gradient(180deg,var(--accent),#c95b57);color:#fff}
+    .btn-ok{background:linear-gradient(180deg,#2f9861,#24784c);color:#fff}
+    .btn-danger{background:#fbe5e4;color:#9d3636}
+    .btn-muted{background:#eef1f4;color:var(--text)}
+    .toolbar{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .section-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px}
+    .section-title h2{margin:0;font-size:1.04rem}
+    .muted{color:var(--muted)}
+    .tiny{font-size:.82rem}
+    .course-list,.student-list,.attendance-list{display:grid;gap:10px}
+    .item{padding:14px;border-radius:20px;background:var(--card-solid);border:1px solid rgba(36,73,110,.1)}
+    .item-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+    .item h3,.item h4{margin:0 0 4px;font-size:1rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{padding:7px 10px;border-radius:999px;font-size:.78rem;font-weight:800;background:#eef4f7;color:var(--primary)}
+    .chip.ok{background:#e5f6ec;color:#1f6c43}
+    .chip.warn{background:#fff0e3;color:#9b622b}
+    .chip.danger{background:#fde8e7;color:#a03e3b}
+    .chip.gray{background:#eef1f4;color:#516272}
+    .inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .inline-actions button{padding:10px 12px;border-radius:14px;font-size:.9rem}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .stat{padding:14px;border-radius:20px;background:#fff;border:1px solid rgba(36,73,110,.08);text-align:center}
+    .stat b{display:block;font-size:1.28rem}
+    .scanner{position:relative;overflow:hidden;background:#0d1822;border-radius:24px;min-height:280px;border:1px solid rgba(255,255,255,.08)}
+    .scanner video{width:100%;height:320px;object-fit:cover;display:block;background:#0d1822}
+    .scanner .overlay{position:absolute;inset:0;pointer-events:none;display:grid;place-items:center}
+    .scan-box{width:min(72vw,280px);height:120px;border:3px solid rgba(255,255,255,.94);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.16)}
+    .scan-text{position:absolute;bottom:14px;left:12px;right:12px;text-align:center;color:#fff;font-weight:700;font-size:.92rem;text-shadow:0 2px 8px rgba(0,0,0,.42)}
+    .flash{padding:12px 14px;border-radius:18px;font-weight:800}
+    .flash.ok{background:#e5f6ec;color:#205f3d}
+    .flash.warn{background:#fff0e3;color:#955f2f}
+    .flash.danger{background:#fde8e7;color:#973636}
+    .hidden{display:none !important}
+    .footer-bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:rgba(243,239,220,.88);backdrop-filter:blur(16px);border-top:1px solid rgba(36,73,110,.08)}
+    .footer-bar .inner{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .footer-bar button{padding:12px 10px;font-size:.88rem}
+    .kicker{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary);font-weight:900}
+    .empty{padding:18px;border-radius:18px;background:#fff;border:1px dashed rgba(36,73,110,.18);color:var(--muted);text-align:center}
+    @media (max-width:640px){
+      .grid.two,.stats,.toolbar,.footer-bar .inner{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <div class="kicker">asistencia con cámara</div>
+      <h1>Lista semanal con códigos de barras</h1>
+      <p>Primero armás tu curso. Después, cada miércoles escaneás y listo.</p>
+    </div>
+
+    <div class="stack">
+      <section class="panel stack">
+        <div class="section-title">
+          <h2>Tu curso activo</h2>
+          <span id="activeCourseBadge" class="chip gray">Sin curso</span>
+        </div>
+        <div class="grid two">
+          <div>
+            <div class="label">Seleccionar curso</div>
+            <select id="courseSelect"></select>
+          </div>
+          <div>
+            <div class="label">Fecha de asistencia</div>
+            <input id="attendanceDate" type="date" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" id="prepareAttendanceBtn">Preparar lista del día</button>
+          <button class="btn-secondary" id="openCreateCourseBtn">Crear curso nuevo</button>
+        </div>
+      </section>
+
+      <section class="panel stack" id="scannerSection">
+        <div class="section-title">
+          <h2>Tomar lista</h2>
+          <span class="tiny muted" id="scannerStatus">Escáner apagado</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="tiny muted">Presentes</span><b id="presentCount">0</b></div>
+          <div class="stat"><span class="tiny muted">Tarde</span><b id="lateCount">0</b></div>
+          <div class="stat"><span class="tiny muted">Pendientes</span><b id="pendingCount">0</b></div>
+          <div class="stat"><span class="tiny muted">Total</span><b id="totalCount">0</b></div>
+        </div>
+        <div id="flashMessage" class="flash warn">Prepará la lista del día antes de escanear.</div>
+        <div class="scanner">
+          <video id="video" playsinline muted></video>
+          <div class="overlay">
+            <div class="scan-box"></div>
+            <div class="scan-text">Apuntá al código de barras del calco</div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" id="startScannerBtn">Encender cámara</button>
+          <button class="btn-muted" id="stopScannerBtn">Apagar cámara</button>
+          <button class="btn-ok" id="manualPresentBtn">Presente manual</button>
+          <button class="btn-accent" id="markLateBtn">Marcar tarde</button>
+        </div>
+        <div class="grid two">
+          <div>
+            <div class="label">Código manual</div>
+            <input id="manualCodeInput" placeholder="Escribí o pegá el código" />
+          </div>
+          <div>
+            <div class="label">Buscar estudiante</div>
+            <input id="studentSearchInput" placeholder="Nombre o código" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-secondary" id="manualCodeBtn">Registrar por código manual</button>
+          <button class="btn-secondary" id="showNewStudentBtn">Agregar estudiante nuevo</button>
+        </div>
+      </section>
+
+      <section class="panel stack">
+        <div class="section-title">
+          <h2>Estudiantes del curso</h2>
+          <span class="tiny muted" id="studentCountLabel">0 cargados</span>
+        </div>
+        <div class="student-list" id="studentList"></div>
+      </section>
+
+      <section class="panel stack">
+        <div class="section-title">
+          <h2>Asistencia del día</h2>
+          <span class="tiny muted">Tocá para corregir rápido</span>
+        </div>
+        <div class="attendance-list" id="attendanceList"></div>
+        <div class="toolbar">
+          <button class="btn-secondary" id="closeAttendanceBtn">Cerrar lista y marcar ausentes</button>
+          <button class="btn-secondary" id="exportDayBtn">Exportar CSV del día</button>
+          <button class="btn-secondary" id="exportCourseBtn">Exportar CSV completo</button>
+          <button class="btn-secondary" id="backupBtn">Descargar respaldo JSON</button>
+          <button class="btn-secondary" id="importBtn">Importar respaldo</button>
+        </div>
+        <input id="importInput" type="file" accept=".json,application/json" class="hidden" />
+      </section>
+
+      <section class="panel stack">
+        <div class="section-title">
+          <h2>Historial del curso</h2>
+          <span class="tiny muted">Tus miércoles guardados</span>
+        </div>
+        <div class="grid two">
+          <div>
+            <div class="label">Ver fecha</div>
+            <select id="historyDateSelect"></select>
+          </div>
+          <div>
+            <div class="label">Resumen rápido</div>
+            <div id="historySummary" class="item tiny muted">Todavía no hay historial para este curso.</div>
+          </div>
+        </div>
+        <div class="attendance-list" id="historyList"></div>
+      </section>
+
+      <section class="panel stack hidden" id="createCoursePanel">
+        <div class="section-title"><h2>Crear curso</h2><span class="tiny muted">Se guarda en este celu</span></div>
+        <div class="grid two">
+          <div><div class="label">Nombre del curso</div><input id="newCourseName" placeholder="Ej: 2° B" /></div>
+          <div><div class="label">Materia o espacio</div><input id="newCourseSubject" placeholder="Ej: Física" /></div>
+          <div><div class="label">Día habitual</div><select id="newCourseDay"><option>lunes</option><option>martes</option><option selected>miércoles</option><option>jueves</option><option>viernes</option><option>sábado</option></select></div>
+          <div><div class="label">Hora</div><input id="newCourseTime" type="time" /></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" id="saveCourseBtn">Guardar curso</button>
+          <button class="btn-muted" id="cancelCreateCourseBtn">Cancelar</button>
+        </div>
+      </section>
+
+      <section class="panel stack hidden" id="newStudentPanel">
+        <div class="section-title"><h2>Agregar estudiante</h2><span class="tiny muted">Alta inicial o nuevo ingreso</span></div>
+        <div class="grid two">
+          <div><div class="label">Nombre</div><input id="studentFirstName" placeholder="Nombre" /></div>
+          <div><div class="label">Apellido</div><input id="studentLastName" placeholder="Apellido" /></div>
+        </div>
+        <div class="grid two">
+          <div><div class="label">Código de barras</div><input id="studentCode" placeholder="Escaneá o escribí el código" /></div>
+          <div><div class="label">Nota opcional</div><input id="studentNote" placeholder="Ej: banco 3" /></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-secondary" id="scanIntoStudentBtn">Pasar último código escaneado</button>
+          <button class="btn-primary" id="saveStudentBtn">Guardar estudiante</button>
+          <button class="btn-muted" id="cancelStudentBtn">Cancelar</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <div class="inner">
+      <button class="btn-primary" id="footerPrepareBtn">Preparar día</button>
+      <button class="btn-ok" id="footerPresentBtn">Presente manual</button>
+      <button class="btn-accent" id="footerNewStudentBtn">Nuevo estudiante</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'db_lista_barcode_v3';
+    const state = loadState();
+    let scannerStream = null;
+    let detector = null;
+    let scanLoopId = null;
+    let scanCooldown = false;
+    let lastScannedCode = '';
+
+    const els = {
+      courseSelect: document.getElementById('courseSelect'),
+      attendanceDate: document.getElementById('attendanceDate'),
+      activeCourseBadge: document.getElementById('activeCourseBadge'),
+      createCoursePanel: document.getElementById('createCoursePanel'),
+      newStudentPanel: document.getElementById('newStudentPanel'),
+      scannerStatus: document.getElementById('scannerStatus'),
+      flashMessage: document.getElementById('flashMessage'),
+      video: document.getElementById('video'),
+      studentList: document.getElementById('studentList'),
+      attendanceList: document.getElementById('attendanceList'),
+      presentCount: document.getElementById('presentCount'),
+      lateCount: document.getElementById('lateCount'),
+      pendingCount: document.getElementById('pendingCount'),
+      totalCount: document.getElementById('totalCount'),
+      studentCountLabel: document.getElementById('studentCountLabel'),
+      studentSearchInput: document.getElementById('studentSearchInput'),
+      manualCodeInput: document.getElementById('manualCodeInput'),
+      historyDateSelect: document.getElementById('historyDateSelect'),
+      historySummary: document.getElementById('historySummary'),
+      historyList: document.getElementById('historyList'),
+      importInput: document.getElementById('importInput'),
+      newCourseName: document.getElementById('newCourseName'),
+      newCourseSubject: document.getElementById('newCourseSubject'),
+      newCourseDay: document.getElementById('newCourseDay'),
+      newCourseTime: document.getElementById('newCourseTime'),
+      studentFirstName: document.getElementById('studentFirstName'),
+      studentLastName: document.getElementById('studentLastName'),
+      studentCode: document.getElementById('studentCode'),
+      studentNote: document.getElementById('studentNote'),
+    };
+
+    function uid(prefix='id') {
+      return `${prefix}_${Math.random().toString(36).slice(2,10)}_${Date.now().toString(36)}`;
+    }
+
+    function todayIso() {
+      const d = new Date();
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      return new Date(d - tzOffset).toISOString().slice(0,10);
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('db_lista_barcode_v2');
+        if (!raw) {
+          return { courses: [], students: [], attendanceDays: [], settings: { activeCourseId: null } };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+          courses: parsed.courses || [],
+          students: parsed.students || [],
+          attendanceDays: parsed.attendanceDays || [],
+          settings: parsed.settings || { activeCourseId: null }
+        };
+      } catch {
+        return { courses: [], students: [], attendanceDays: [], settings: { activeCourseId: null } };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getActiveCourse() {
+      return state.courses.find(c => c.id === state.settings.activeCourseId) || null;
+    }
+
+    function getCourseStudents(courseId) {
+      return state.students.filter(s => s.courseId === courseId && s.active !== false);
+    }
+
+    function getAttendanceDay(courseId, date) {
+      return state.attendanceDays.find(d => d.courseId === courseId && d.date === date) || null;
+    }
+
+    function ensureAttendanceDay(courseId, date) {
+      let day = getAttendanceDay(courseId, date);
+      if (!day) {
+        day = { id: uid('day'), courseId, date, records: [] };
+        state.attendanceDays.push(day);
+      }
+      const students = getCourseStudents(courseId);
+      students.forEach(student => {
+        if (!day.records.some(r => r.studentId === student.id)) {
+          day.records.push({ studentId: student.id, status: 'pending', time: '', method: '' });
+        }
+      });
+      saveState();
+      return day;
+    }
+
+    function updateFlash(type, text) {
+      els.flashMessage.className = `flash ${type}`;
+      els.flashMessage.textContent = text;
+    }
+
+    let audioCtx = null;
+    function beep(kind='ok') {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const notes = kind === 'warn' ? [420, 320] : [740, 988];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const start = now + i * 0.09;
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.12, start + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.11);
+          osc.start(start);
+          osc.stop(start + 0.12);
+        });
+      } catch {}
+      if (navigator.vibrate) navigator.vibrate(kind === 'warn' ? [60, 60, 60] : [80, 40, 80]);
+    }
+
+    function renderCourses() {
+      const previous = state.settings.activeCourseId;
+      els.courseSelect.innerHTML = '';
+      if (!state.courses.length) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Primero creá un curso';
+        els.courseSelect.appendChild(opt);
+        state.settings.activeCourseId = null;
+      } else {
+        state.courses.forEach(course => {
+          const opt = document.createElement('option');
+          opt.value = course.id;
+          opt.textContent = `${course.name}${course.subject ? ' · ' + course.subject : ''}`;
+          els.courseSelect.appendChild(opt);
+        });
+        state.settings.activeCourseId = state.courses.some(c => c.id === previous) ? previous : state.courses[0].id;
+        els.courseSelect.value = state.settings.activeCourseId;
+      }
+      const active = getActiveCourse();
+      els.activeCourseBadge.textContent = active ? `${active.name} · ${active.day}` : 'Sin curso';
+      saveState();
+    }
+
+    function renderStudents() {
+      const active = getActiveCourse();
+      const search = els.studentSearchInput.value.trim().toLowerCase();
+      if (!active) {
+        els.studentList.innerHTML = '<div class="empty">Creá un curso para empezar.</div>';
+        els.studentCountLabel.textContent = '0 cargados';
+        return;
+      }
+      let students = getCourseStudents(active.id).sort((a,b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`));
+      if (search) {
+        students = students.filter(s => (`${s.firstName} ${s.lastName}`.toLowerCase().includes(search) || (s.code || '').toLowerCase().includes(search)));
+      }
+      els.studentCountLabel.textContent = `${students.length} cargados`;
+      if (!students.length) {
+        els.studentList.innerHTML = '<div class="empty">Todavía no cargaste estudiantes en este curso.</div>';
+        return;
+      }
+      els.studentList.innerHTML = students.map(s => `
+        <div class="item">
+          <div class="item-top">
+            <div>
+              <h4>${escapeHtml(s.lastName)}, ${escapeHtml(s.firstName)}</h4>
+              <div class="tiny muted">Código: ${escapeHtml(s.code || '-')}</div>
+              ${s.note ? `<div class="tiny muted">${escapeHtml(s.note)}</div>` : ''}
+            </div>
+            <span class="chip">Activo</span>
+          </div>
+          <div class="inline-actions">
+            <button class="btn-muted" onclick="prefillStudent('${s.id}')">Editar</button>
+            <button class="btn-danger" onclick="removeStudent('${s.id}')">Eliminar</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderAttendance() {
+      const active = getActiveCourse();
+      if (!active) {
+        els.attendanceList.innerHTML = '<div class="empty">Sin curso seleccionado.</div>';
+        updateStats([]);
+        return;
+      }
+      const day = getAttendanceDay(active.id, els.attendanceDate.value);
+      const students = getCourseStudents(active.id);
+      if (!day) {
+        els.attendanceList.innerHTML = '<div class="empty">Tocá “Preparar lista del día” para empezar.</div>';
+        updateStats([]);
+        return;
+      }
+      const records = day.records.map(r => ({ ...r, student: students.find(s => s.id === r.studentId) })).filter(r => r.student);
+      records.sort((a,b) => `${a.student.lastName} ${a.student.firstName}`.localeCompare(`${b.student.lastName} ${b.student.firstName}`));
+      if (!records.length) {
+        els.attendanceList.innerHTML = '<div class="empty">No hay estudiantes cargados todavía.</div>';
+      } else {
+        els.attendanceList.innerHTML = records.map(r => {
+          const chipClass = r.status === 'present' ? 'ok' : r.status === 'late' ? 'warn' : r.status === 'absent' ? 'danger' : 'gray';
+          const label = r.status === 'present' ? 'Presente' : r.status === 'late' ? 'Tarde' : r.status === 'absent' ? 'Ausente' : 'Pendiente';
+          return `
+            <div class="item">
+              <div class="item-top">
+                <div>
+                  <h4>${escapeHtml(r.student.lastName)}, ${escapeHtml(r.student.firstName)}</h4>
+                  <div class="tiny muted">${escapeHtml(r.student.code || '-')} ${r.time ? '· ' + escapeHtml(r.time) : ''}</div>
+                </div>
+                <span class="chip ${chipClass}">${label}</span>
+              </div>
+              <div class="inline-actions">
+                <button class="btn-ok" onclick="setAttendanceStatus('${r.studentId}','present')">Presente</button>
+                <button class="btn-accent" onclick="setAttendanceStatus('${r.studentId}','late')">Tarde</button>
+                <button class="btn-muted" onclick="setAttendanceStatus('${r.studentId}','pending')">Pendiente</button>
+                <button class="btn-danger" onclick="setAttendanceStatus('${r.studentId}','absent')">Ausente</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+      updateStats(records);
+    }
+
+    function updateStats(records) {
+      const total = records.length;
+      const present = records.filter(r => r.status === 'present').length;
+      const late = records.filter(r => r.status === 'late').length;
+      const pending = records.filter(r => r.status === 'pending').length;
+      els.presentCount.textContent = present;
+      els.lateCount.textContent = late;
+      els.pendingCount.textContent = pending;
+      els.totalCount.textContent = total;
+    }
+
+    function renderHistory() {
+      const active = getActiveCourse();
+      if (!active) {
+        els.historyDateSelect.innerHTML = '<option value="">Sin curso</option>';
+        els.historySummary.textContent = 'Seleccioná o creá un curso para ver el historial.';
+        els.historyList.innerHTML = '<div class="empty">Todavía no hay historial.</div>';
+        return;
+      }
+      const days = state.attendanceDays
+        .filter(d => d.courseId === active.id)
+        .sort((a,b) => b.date.localeCompare(a.date));
+
+      if (!days.length) {
+        els.historyDateSelect.innerHTML = '<option value="">Sin registros</option>';
+        els.historySummary.textContent = 'Todavía no hay historial para este curso.';
+        els.historyList.innerHTML = '<div class="empty">Prepará y guardá una lista para empezar a construir el historial.</div>';
+        return;
+      }
+
+      const currentValue = els.historyDateSelect.value;
+      els.historyDateSelect.innerHTML = days.map(d => `<option value="${d.date}">${d.date}</option>`).join('');
+      els.historyDateSelect.value = days.some(d => d.date === currentValue) ? currentValue : days[0].date;
+
+      const day = days.find(d => d.date === els.historyDateSelect.value) || days[0];
+      const students = getCourseStudents(active.id);
+      const records = day.records
+        .map(r => ({ ...r, student: students.find(s => s.id === r.studentId) }))
+        .filter(r => r.student)
+        .sort((a,b) => `${a.student.lastName} ${a.student.firstName}`.localeCompare(`${b.student.lastName} ${b.student.firstName}`));
+
+      const present = records.filter(r => r.status === 'present').length;
+      const late = records.filter(r => r.status === 'late').length;
+      const absent = records.filter(r => r.status === 'absent').length;
+      const pending = records.filter(r => r.status === 'pending').length;
+      els.historySummary.innerHTML = `<b>${day.date}</b><br>Presentes: ${present} · Tarde: ${late} · Ausentes: ${absent} · Pendientes: ${pending}`;
+
+      els.historyList.innerHTML = records.length ? records.map(r => {
+        const chipClass = r.status === 'present' ? 'ok' : r.status === 'late' ? 'warn' : r.status === 'absent' ? 'danger' : 'gray';
+        const label = r.status === 'present' ? 'Presente' : r.status === 'late' ? 'Tarde' : r.status === 'absent' ? 'Ausente' : 'Pendiente';
+        return `
+          <div class="item">
+            <div class="item-top">
+              <div>
+                <h4>${escapeHtml(r.student.lastName)}, ${escapeHtml(r.student.firstName)}</h4>
+                <div class="tiny muted">${escapeHtml(r.student.code || '-')} ${r.time ? '· ' + escapeHtml(r.time) : ''}</div>
+              </div>
+              <span class="chip ${chipClass}">${label}</span>
+            </div>
+          </div>`;
+      }).join('') : '<div class="empty">No hubo registros ese día.</div>';
+    }
+
+    function importJsonFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!parsed || !Array.isArray(parsed.courses) || !Array.isArray(parsed.students) || !Array.isArray(parsed.attendanceDays)) {
+            throw new Error('Formato inválido');
+          }
+          state.courses = parsed.courses;
+          state.students = parsed.students;
+          state.attendanceDays = parsed.attendanceDays;
+          state.settings = parsed.settings || { activeCourseId: parsed.courses[0]?.id || null };
+          saveState();
+          renderAll();
+          updateFlash('ok', 'Respaldo importado correctamente.');
+          beep('ok');
+        } catch (e) {
+          updateFlash('danger', 'No pude importar ese archivo. Revisá que sea un respaldo JSON de la app.');
+          beep('warn');
+        } finally {
+          els.importInput.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function prepareAttendanceDay() {
+      const active = getActiveCourse();
+      if (!active) return updateFlash('danger', 'Primero creá o elegí un curso.');
+      ensureAttendanceDay(active.id, els.attendanceDate.value);
+      updateFlash('ok', `Lista del ${els.attendanceDate.value} preparada.`);
+      renderAttendance();
+      renderHistory();
+    }
+
+    function upsertStudent({ id = null, firstName, lastName, code, note }) {
+      const active = getActiveCourse();
+      if (!active) return updateFlash('danger', 'Primero elegí un curso.');
+      if (!firstName || !lastName || !code) return updateFlash('danger', 'Completá nombre, apellido y código.');
+      const duplicate = state.students.find(s => s.code === code && s.id !== id && s.active !== false);
+      if (duplicate) return updateFlash('danger', 'Ese código ya está asignado a otro estudiante.');
+      if (id) {
+        const student = state.students.find(s => s.id === id);
+        if (!student) return;
+        student.firstName = firstName;
+        student.lastName = lastName;
+        student.code = code;
+        student.note = note;
+      } else {
+        const student = { id: uid('stu'), courseId: active.id, firstName, lastName, code, note, active: true };
+        state.students.push(student);
+        const day = getAttendanceDay(active.id, els.attendanceDate.value);
+        if (day && !day.records.some(r => r.studentId === student.id)) {
+          day.records.push({ studentId: student.id, status: 'present', time: currentTime(), method: 'new_student' });
+        }
+      }
+      saveState();
+      clearStudentForm();
+      hidePanel('newStudentPanel');
+      renderAll();
+      updateFlash('ok', 'Estudiante guardado.');
+    }
+
+    function currentTime() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function setAttendanceStatus(studentId, status, method='manual') {
+      const active = getActiveCourse();
+      if (!active) return;
+      const day = ensureAttendanceDay(active.id, els.attendanceDate.value);
+      const record = day.records.find(r => r.studentId === studentId);
+      if (!record) return;
+      record.status = status;
+      record.method = method;
+      record.time = status === 'pending' ? '' : currentTime();
+      saveState();
+      renderAttendance();
+      renderHistory();
+    }
+
+    function registerCode(code, status='present', method='scan') {
+      const active = getActiveCourse();
+      if (!active) return updateFlash('danger', 'Primero elegí un curso.');
+      const day = getAttendanceDay(active.id, els.attendanceDate.value);
+      if (!day) return updateFlash('warn', 'Primero tocá “Preparar lista del día”.');
+      const student = getCourseStudents(active.id).find(s => s.code === code);
+      if (!student) {
+        lastScannedCode = code;
+        els.studentCode.value = code;
+        showPanel('newStudentPanel');
+        updateFlash('warn', `Código no encontrado. Cargá al estudiante nuevo y ya queda presente.`);
+        beep('warn');
+        return;
+      }
+      const record = day.records.find(r => r.studentId === student.id);
+      if (!record) return;
+      record.status = status;
+      record.time = currentTime();
+      record.method = method;
+      saveState();
+      renderAttendance();
+      renderHistory();
+      beep(status === 'late' ? 'warn' : 'ok');
+      updateFlash(status === 'late' ? 'warn' : 'ok', `${student.firstName} ${student.lastName} · ${status === 'late' ? 'Tarde' : 'Presente'}`);
+    }
+
+    async function startScanner() {
+      if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
+        return updateFlash('danger', 'Este navegador no permite usar la cámara.');
+      }
+      try {
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        els.video.srcObject = scannerStream;
+        await els.video.play();
+        els.scannerStatus.textContent = 'Cámara encendida';
+        detector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['ean_13','ean_8','code_128','code_39','upc_a','upc_e','itf'] }) : null;
+        if (!detector) updateFlash('warn', 'La cámara funciona, pero este navegador quizá no lea códigos automáticamente. Usá código manual si hace falta.');
+        scanLoop();
+      } catch (e) {
+        updateFlash('danger', 'No pude abrir la cámara. Probá dar permiso o usar código manual.');
+      }
+    }
+
+    function stopScanner() {
+      if (scanLoopId) cancelAnimationFrame(scanLoopId);
+      scanLoopId = null;
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(t => t.stop());
+        scannerStream = null;
+      }
+      els.video.srcObject = null;
+      els.scannerStatus.textContent = 'Escáner apagado';
+    }
+
+    async function scanLoop() {
+      if (!scannerStream || !detector) {
+        scanLoopId = requestAnimationFrame(scanLoop);
+        return;
+      }
+      try {
+        const barcodes = await detector.detect(els.video);
+        if (barcodes.length && !scanCooldown) {
+          const code = (barcodes[0].rawValue || '').trim();
+          if (code) {
+            scanCooldown = true;
+            lastScannedCode = code;
+            registerCode(code, pendingLateMode ? 'late' : 'present', 'camera');
+            pendingLateMode = false;
+            setTimeout(() => scanCooldown = false, 1200);
+          }
+        }
+      } catch {}
+      scanLoopId = requestAnimationFrame(scanLoop);
+    }
+
+    let pendingLateMode = false;
+
+    function exportCsvDay() {
+      const active = getActiveCourse();
+      if (!active) return;
+      const day = getAttendanceDay(active.id, els.attendanceDate.value);
+      if (!day) return updateFlash('warn', 'No hay lista preparada para ese día.');
+      const students = getCourseStudents(active.id);
+      const rows = [['fecha','curso','materia','apellido','nombre','codigo','estado','hora','metodo']];
+      day.records.forEach(r => {
+        const s = students.find(st => st.id === r.studentId);
+        if (!s) return;
+        rows.push([day.date, active.name, active.subject || '', s.lastName, s.firstName, s.code || '', r.status, r.time || '', r.method || '']);
+      });
+      downloadCsv(rows, `${slug(active.name)}_${day.date}.csv`);
+    }
+
+    function exportCsvCourse() {
+      const active = getActiveCourse();
+      if (!active) return;
+      const students = getCourseStudents(active.id);
+      const rows = [['fecha','curso','materia','apellido','nombre','codigo','estado','hora','metodo']];
+      state.attendanceDays.filter(d => d.courseId === active.id).sort((a,b) => a.date.localeCompare(b.date)).forEach(day => {
+        day.records.forEach(r => {
+          const s = students.find(st => st.id === r.studentId);
+          if (!s) return;
+          rows.push([day.date, active.name, active.subject || '', s.lastName, s.firstName, s.code || '', r.status, r.time || '', r.method || '']);
+        });
+      });
+      downloadCsv(rows, `${slug(active.name)}_historial.csv`);
+    }
+
+    function backupJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      triggerDownload(blob, `respaldo_lista_${todayIso()}.json`);
+    }
+
+    function closeAttendance() {
+      const active = getActiveCourse();
+      if (!active) return;
+      const day = ensureAttendanceDay(active.id, els.attendanceDate.value);
+      day.records.forEach(r => {
+        if (r.status === 'pending') {
+          r.status = 'absent';
+          r.method = 'auto_close';
+        }
+      });
+      saveState();
+      renderAttendance();
+      renderHistory();
+      updateFlash('warn', 'Lista cerrada. Los pendientes quedaron como ausentes.');
+    }
+
+    function removeStudent(studentId) {
+      const student = state.students.find(s => s.id === studentId);
+      if (!student) return;
+      if (!confirm(`Eliminar a ${student.firstName} ${student.lastName}?`)) return;
+      student.active = false;
+      state.attendanceDays.forEach(day => {
+        day.records = day.records.filter(r => r.studentId !== studentId);
+      });
+      saveState();
+      renderAll();
+      updateFlash('warn', 'Estudiante eliminado del curso.');
+    }
+
+    function prefillStudent(studentId) {
+      const s = state.students.find(st => st.id === studentId);
+      if (!s) return;
+      showPanel('newStudentPanel');
+      els.newStudentPanel.dataset.editingId = studentId;
+      els.studentFirstName.value = s.firstName;
+      els.studentLastName.value = s.lastName;
+      els.studentCode.value = s.code;
+      els.studentNote.value = s.note || '';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function clearStudentForm() {
+      delete els.newStudentPanel.dataset.editingId;
+      els.studentFirstName.value = '';
+      els.studentLastName.value = '';
+      els.studentCode.value = '';
+      els.studentNote.value = '';
+    }
+
+    function showPanel(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hidePanel(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function saveCourse() {
+      const name = els.newCourseName.value.trim();
+      if (!name) return updateFlash('danger', 'Poné un nombre para el curso.');
+      const course = {
+        id: uid('course'),
+        name,
+        subject: els.newCourseSubject.value.trim(),
+        day: els.newCourseDay.value,
+        time: els.newCourseTime.value
+      };
+      state.courses.push(course);
+      state.settings.activeCourseId = course.id;
+      saveState();
+      els.newCourseName.value = '';
+      els.newCourseSubject.value = '';
+      els.newCourseDay.value = 'miércoles';
+      els.newCourseTime.value = '';
+      hidePanel('createCoursePanel');
+      renderAll();
+      updateFlash('ok', 'Curso creado. Ahora podés cargar estudiantes.');
+    }
+
+    function manualPresentFlow(status='present') {
+      const active = getActiveCourse();
+      if (!active) return updateFlash('danger', 'Elegí un curso primero.');
+      const students = getCourseStudents(active.id);
+      if (!students.length) return updateFlash('warn', 'Todavía no hay estudiantes cargados.');
+      const text = prompt('Escribí apellido o nombre del estudiante:');
+      if (!text) return;
+      const q = text.toLowerCase();
+      const matches = students.filter(s => (`${s.firstName} ${s.lastName}`.toLowerCase().includes(q)));
+      if (!matches.length) return updateFlash('danger', 'No encontré coincidencias.');
+      if (matches.length === 1) return setAttendanceStatus(matches[0].id, status, 'manual_search');
+      const choice = prompt('Encontré varias opciones:\n' + matches.map((s,i) => `${i+1}. ${s.lastName}, ${s.firstName}`).join('\n') + '\n\nEscribí el número:');
+      const idx = Number(choice) - 1;
+      if (matches[idx]) setAttendanceStatus(matches[idx].id, status, 'manual_search');
+    }
+
+    function downloadCsv(rows, filename) {
+      const csv = rows.map(row => row.map(v => {
+        const value = String(v ?? '');
+        return /[",;\n]/.test(value) ? '"' + value.replace(/"/g,'""') + '"' : value;
+      }).join(';')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      triggerDownload(blob, filename);
+    }
+
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function slug(text) {
+      return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+    }
+
+    function renderAll() {
+      renderCourses();
+      renderStudents();
+      renderAttendance();
+      renderHistory();
+    }
+
+    // Events
+    els.attendanceDate.value = todayIso();
+    document.getElementById('prepareAttendanceBtn').onclick = prepareAttendanceDay;
+    document.getElementById('footerPrepareBtn').onclick = prepareAttendanceDay;
+    document.getElementById('openCreateCourseBtn').onclick = () => showPanel('createCoursePanel');
+    document.getElementById('cancelCreateCourseBtn').onclick = () => hidePanel('createCoursePanel');
+    document.getElementById('saveCourseBtn').onclick = saveCourse;
+    document.getElementById('showNewStudentBtn').onclick = () => { clearStudentForm(); showPanel('newStudentPanel'); };
+    document.getElementById('footerNewStudentBtn').onclick = () => { clearStudentForm(); showPanel('newStudentPanel'); };
+    document.getElementById('cancelStudentBtn').onclick = () => { clearStudentForm(); hidePanel('newStudentPanel'); };
+    document.getElementById('scanIntoStudentBtn').onclick = () => { if (lastScannedCode) els.studentCode.value = lastScannedCode; };
+    document.getElementById('saveStudentBtn').onclick = () => upsertStudent({
+      id: els.newStudentPanel.dataset.editingId || null,
+      firstName: els.studentFirstName.value.trim(),
+      lastName: els.studentLastName.value.trim(),
+      code: els.studentCode.value.trim(),
+      note: els.studentNote.value.trim()
+    });
+    document.getElementById('startScannerBtn').onclick = startScanner;
+    document.getElementById('stopScannerBtn').onclick = stopScanner;
+    document.getElementById('manualCodeBtn').onclick = () => {
+      const code = els.manualCodeInput.value.trim();
+      if (!code) return updateFlash('warn', 'Escribí un código.');
+      registerCode(code, 'present', 'manual_code');
+      els.manualCodeInput.value = '';
+    };
+    document.getElementById('manualPresentBtn').onclick = () => manualPresentFlow('present');
+    document.getElementById('footerPresentBtn').onclick = () => manualPresentFlow('present');
+    document.getElementById('markLateBtn').onclick = () => {
+      pendingLateMode = true;
+      updateFlash('warn', 'El próximo escaneo se marcará como tarde.');
+      setTimeout(() => { pendingLateMode = false; }, 5000);
+    };
+    document.getElementById('closeAttendanceBtn').onclick = closeAttendance;
+    document.getElementById('exportDayBtn').onclick = exportCsvDay;
+    document.getElementById('exportCourseBtn').onclick = exportCsvCourse;
+    document.getElementById('backupBtn').onclick = backupJson;
+    document.getElementById('importBtn').onclick = () => els.importInput.click();
+    els.importInput.onchange = (e) => importJsonFile(e.target.files[0]);
+    els.historyDateSelect.onchange = renderHistory;
+    els.courseSelect.onchange = (e) => { state.settings.activeCourseId = e.target.value || null; saveState(); renderAll(); };
+    els.studentSearchInput.oninput = renderStudents;
+
+    window.setAttendanceStatus = setAttendanceStatus;
+    window.removeStudent = removeStudent;
+    window.prefillStudent = prefillStudent;
+
+    renderAll();
+    updateFlash('warn', state.courses.length ? 'Podés preparar la lista del día y empezar.' : 'Primero creá tu curso.');
+  </script>
+</body>
+</html>
